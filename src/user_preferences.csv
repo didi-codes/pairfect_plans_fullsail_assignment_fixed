@@ -1,0 +1,11 @@
+outdoor,foodie,budget,hobby,recommendations
+1,1,Low,Arts,"Picnic, Art Gallery"
+0,1,Medium,Cooking,"Cooking Class, Rooftop Dinner"
+1,0,High,Travel,"Weekend Getaway, Hiking"
+1,1,Medium,Sports,"Sports Event, Casual Dinner"
+0,0,Low,Movies,"Movie Night, Coffee Date"
+1,1,High,Arts,"Fancy Dinner, Art Exhibit"
+0,1,Medium,Travel,"Food Tour, Weekend Getaway"
+1,0,Low,Cooking,"Picnic, Cooking Class"
+0,0,Medium,Sports,"Board Game Night, Sports Event"
+1,1,High,Movies,"Rooftop Movie, Fancy Dinner"

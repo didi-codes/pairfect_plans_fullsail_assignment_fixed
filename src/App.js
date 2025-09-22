@@ -1,136 +1,73 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
-
-const API_BASE_URL = 'http://localhost:5000';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import WelcomePage from './WelcomePage';
+import SignupPage from './SignupPage';
+import LoginPage from './LoginPage';
+import Onboarding from './Onboarding';
+import Dashboard from './Dashboard';
+import { auth, db } from './firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 function App() {
-  const [businesses, setBusinesses] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+  const [userPreferences, setUserPreferences] = useState(null);
+  const [recommendedDates, setRecommendedDates] = useState([]);
 
-  const loadBusinesses = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/businesses`);
-      const data = await response.json();
-      
-      if (data.error) {
-        setError(data.error);
-      } else {
-        setBusinesses(data);
+  // Listen to Firebase Auth state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        // Fetch preferences if they exist
+        const prefDoc = await getDoc(doc(db, 'userPreferences', currentUser.uid));
+        if (prefDoc.exists()) {
+          setUserPreferences(prefDoc.data());
+
+          // TEMP recommendation model
+          setRecommendedDates([
+            { title: 'Picnic in the park', description: 'Perfect for outdoor lovers!' },
+            { title: 'Cooking class', description: 'Try a fun indoor activity together.' },
+          ]);
+        }
       }
-    } catch (err) {
-      setError('Failed to load businesses. Make sure Flask server is running.');
-    } finally {
-      setLoading(false);
-    }
-  };
+      setLoadingAuth(false);
+    });
 
-  const rateRestaurant = async (businessId, rating) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/rate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          business_id: businessId,
-          rating: parseInt(rating)
-        })
-      });
-      
-      const data = await response.json();
-      if (data.success) {
-        alert('Rating submitted successfully!');
-      }
-    } catch (err) {
-      alert('Error submitting rating');
-      console.error('Error:', err);
-    }
-  };
+    return () => unsubscribe();
+  }, []);
 
-  const StarRating = ({ stars }) => {
-    const fullStars = Math.floor(stars);
-    const hasHalfStar = stars % 1 !== 0;
-    
-    return (
-      <span className="stars">
-        {'★'.repeat(fullStars)}
-        {hasHalfStar && '☆'}
-        {'☆'.repeat(5 - Math.ceil(stars))}
-      </span>
-    );
-  };
+  if (loadingAuth) return <p>Loading...</p>;
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>🍽️ Yelp Restaurant Rating App</h1>
-        <p>Discover and rate restaurants from real Yelp data!</p>
-        
-        <div className="button-container">
-          <button 
-            className="load-btn"
-            onClick={loadBusinesses}
-            disabled={loading}
-          >
-            {loading ? 'Loading...' : 'Load Restaurants'}
-          </button>
-        </div>
-
-        {error && (
-          <div className="error">
-            <p>❌ {error}</p>
-            <p>Make sure your Flask server is running on http://localhost:5000</p>
-          </div>
-        )}
-
-        {businesses.length > 0 && (
-          <div className="businesses-container">
-            <h2>🏪 Found {businesses.length} Restaurants</h2>
-            <div className="businesses-grid">
-              {businesses.map((business) => (
-                <div key={business.business_id} className="business-card">
-                  <h3>{business.name}</h3>
-                  
-                  <div className="business-info">
-                    <p><strong>📍 Location:</strong> {business.city}, {business.state}</p>
-                    <p>
-                      <strong>⭐ Rating:</strong> 
-                      <StarRating stars={business.stars} /> 
-                      ({business.stars}/5)
-                    </p>
-                    <p><strong>📝 Reviews:</strong> {business.review_count}</p>
-                  </div>
-
-                  <div className="rating-section">
-                    <label><strong>Rate this restaurant:</strong></label>
-                    <select 
-                      onChange={(e) => {
-                        if (e.target.value) {
-                          rateRestaurant(business.business_id, e.target.value);
-                          e.target.value = ''; // Reset dropdown
-                        }
-                      }}
-                      className="rating-select"
-                    >
-                      <option value="">Select rating...</option>
-                      <option value="1">⭐ 1 Star</option>
-                      <option value="2">⭐⭐ 2 Stars</option>
-                      <option value="3">⭐⭐⭐ 3 Stars</option>
-                      <option value="4">⭐⭐⭐⭐ 4 Stars</option>
-                      <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
-                    </select>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<WelcomePage />} />
+        <Route path="/signup" element={user ? <Navigate to="/onboarding" /> : <SignupPage />} />
+        <Route path="/login" element={user ? <Navigate to="/onboarding" /> : <LoginPage />} />
+        <Route 
+          path="/onboarding" 
+          element={
+            user ? (
+              userPreferences ? <Navigate to="/dashboard" /> : <Onboarding onComplete={(answers) => setUserPreferences(answers)} />
+            ) : (
+              <Navigate to="/login" />
+            )
+          } 
+        />
+        <Route 
+          path="/dashboard" 
+          element={
+            user ? (
+              <Dashboard userPreferences={userPreferences} recommendedDates={recommendedDates} />
+            ) : (
+              <Navigate to="/login" />
+            )
+          } 
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
