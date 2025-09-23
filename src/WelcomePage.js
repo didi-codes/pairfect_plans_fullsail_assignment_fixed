@@ -1,20 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import logo from "./Pairfect_Plans_Logo.png";
 import './App.css';
 
 function WelcomePage() {
   return (
-    <div className="App">
+    <div className="App" id='welcome'>
+      <img src={logo} alt="logo" className="logo" id='welcome-logo'/>
       <header className="App-header">
-        <h1>Pairfect Plans 💕</h1>
-        <p>Make Dating Easy, Make It Fun</p>
+        <h1>Pairfect Plans</h1>
         <div className="welcome-buttons">
           <Link to="/signup">
-            <button className="welcome-btn">Sign Up</button>
+            <button className="welcome-btn">Get Started</button>
           </Link>
-          <Link to="/login">
-            <button className="welcome-btn secondary">Log In</button>
+          <div className="login-link">
+          <p className='subtitle'>Have An Account?  
+            <Link to="/login">
+             Log In
           </Link>
+          </p>
+          </div>
         </div>
       </header>
     </div>

@@ -72,7 +72,8 @@ function Onboarding({ onComplete }) {
   return (
     <div className="App">
       <header className="App-header">
-        <h2>Onboarding</h2>
+        <h2>Hello!</h2>
+        <p>Let's Get To Know You</p>
         <p>Step {currentStep + 1} of {questions.length}</p>
         {saving && <p>Saving your answer...</p>}
         {renderQuestion()}
