@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import './App.css';
-import { Link, useNavigate } from 'react-router-dom';
-import { auth, db } from './firebase';
+import { auth } from './firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { useNavigate, Link } from 'react-router-dom';
 
 function SignupPage() {
   const [formData, setFormData] = useState({ name: '', email: '', username: '', password: '' });
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -17,28 +16,14 @@ function SignupPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+    setError('');
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
-      const user = userCredential.user;
-
-      // store additional info in Firestore
-      await setDoc(doc(db, 'users', user.uid), {
-        name: formData.name,
-        username: formData.username,
-        email: formData.email,
-        createdAt: new Date(),
-      });
-
-      // Redirect to onboarding after signup
+      await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      // Navigate directly to onboarding
       navigate('/onboarding');
     } catch (err) {
-      console.error('Signup error:', err);
       setError(err.message);
+      console.error('Signup error:', err);
     }
   };
 
@@ -46,7 +31,6 @@ function SignupPage() {
     <div className="App">
       <header className="App-header">
         <h2>Sign Up</h2>
-        {error && <p className="error">{error}</p>}
         <form className="signup-form" onSubmit={handleSubmit}>
           <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required />
           <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
@@ -54,6 +38,7 @@ function SignupPage() {
           <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} required />
           <button type="submit" className="signup-btn">Create Account</button>
         </form>
+        {error && <p className="error">{error}</p>}
         <p>Already have an account? <Link to="/login">Log In</Link></p>
       </header>
     </div>

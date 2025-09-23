@@ -43,7 +43,6 @@ function Onboarding({ onComplete }) {
 
   const renderQuestion = () => {
     const q = questions[currentStep];
-
     if (q.type === 'boolean') {
       return (
         <div className="question-container">

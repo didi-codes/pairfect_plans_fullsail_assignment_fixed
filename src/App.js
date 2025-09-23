@@ -15,23 +15,28 @@ function App() {
   const [userPreferences, setUserPreferences] = useState(null);
   const [recommendedDates, setRecommendedDates] = useState([]);
 
-  // Listen to Firebase Auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+
       if (currentUser) {
-        // Fetch preferences if they exist
         const prefDoc = await getDoc(doc(db, 'userPreferences', currentUser.uid));
         if (prefDoc.exists()) {
-          setUserPreferences(prefDoc.data());
+          const prefs = prefDoc.data();
+          setUserPreferences(prefs);
 
-          // TEMP recommendation model
-          setRecommendedDates([
-            { title: 'Picnic in the park', description: 'Perfect for outdoor lovers!' },
-            { title: 'Cooking class', description: 'Try a fun indoor activity together.' },
-          ]);
+          // TEMP: generate recommendations
+          const recommendations = [];
+          if (prefs.outdoor) recommendations.push({ title: 'Picnic in the park', description: 'Enjoy a sunny day outside!' });
+          if (prefs.foodie) recommendations.push({ title: 'Cooking class', description: 'Try cooking something new together.' });
+          if (prefs.hobby === 'Arts') recommendations.push({ title: 'Visit an art gallery', description: 'Explore creativity together.' });
+          if (prefs.hobby === 'Movies') recommendations.push({ title: 'Movie night', description: 'Pick a film and relax together.' });
+          if (!recommendations.length) recommendations.push({ title: 'Coffee date', description: 'A simple, classic choice!' });
+
+          setRecommendedDates(recommendations);
         }
       }
+
       setLoadingAuth(false);
     });
 
@@ -45,26 +50,26 @@ function App() {
       <Routes>
         <Route path="/" element={<WelcomePage />} />
         <Route path="/signup" element={user ? <Navigate to="/onboarding" /> : <SignupPage />} />
-        <Route path="/login" element={user ? <Navigate to="/onboarding" /> : <LoginPage />} />
-        <Route 
-          path="/onboarding" 
+        <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
+        <Route
+          path="/onboarding"
           element={
             user ? (
               userPreferences ? <Navigate to="/dashboard" /> : <Onboarding onComplete={(answers) => setUserPreferences(answers)} />
             ) : (
               <Navigate to="/login" />
             )
-          } 
+          }
         />
-        <Route 
-          path="/dashboard" 
+        <Route
+          path="/dashboard"
           element={
             user ? (
               <Dashboard userPreferences={userPreferences} recommendedDates={recommendedDates} />
             ) : (
               <Navigate to="/login" />
             )
-          } 
+          }
         />
       </Routes>
     </BrowserRouter>

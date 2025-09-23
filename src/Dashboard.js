@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import './App.css';
 import { useNavigate } from 'react-router-dom';
+import './App.css';
 
 function Dashboard({ userPreferences: initialPreferences, recommendedDates: initialRecommendations }) {
   const [userPreferences, setUserPreferences] = useState(initialPreferences);
@@ -24,16 +24,15 @@ function Dashboard({ userPreferences: initialPreferences, recommendedDates: init
           const prefs = prefDoc.data();
           setUserPreferences(prefs);
 
-          // TEMP: generate recommendations based on preferences
-          const recommendations = [];
-
-          if (prefs.outdoor) recommendations.push({ title: 'Picnic in the park', description: 'Enjoy a sunny day outside!' });
-          if (prefs.foodie) recommendations.push({ title: 'Cooking class', description: 'Try cooking something new together.' });
-          if (prefs.hobby === 'Arts') recommendations.push({ title: 'Visit an art gallery', description: 'Explore creativity together.' });
-          if (prefs.hobby === 'Movies') recommendations.push({ title: 'Movie night', description: 'Pick a film and relax together.' });
-          if (!recommendations.length) recommendations.push({ title: 'Coffee date', description: 'A simple, classic choice!' });
-
-          setRecommendedDates(recommendations);
+          if (!recommendedDates.length) {
+            const recommendations = [];
+            if (prefs.outdoor) recommendations.push({ title: 'Picnic in the park', description: 'Enjoy a sunny day outside!' });
+            if (prefs.foodie) recommendations.push({ title: 'Cooking class', description: 'Try cooking something new together.' });
+            if (prefs.hobby === 'Arts') recommendations.push({ title: 'Visit an art gallery', description: 'Explore creativity together.' });
+            if (prefs.hobby === 'Movies') recommendations.push({ title: 'Movie night', description: 'Pick a film and relax together.' });
+            if (!recommendations.length) recommendations.push({ title: 'Coffee date', description: 'A simple, classic choice!' });
+            setRecommendedDates(recommendations);
+          }
         }
       } catch (err) {
         console.error('Error fetching preferences:', err);
@@ -43,7 +42,8 @@ function Dashboard({ userPreferences: initialPreferences, recommendedDates: init
     };
 
     fetchPreferences();
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLogout = async () => {
     await auth.signOut();
