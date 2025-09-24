@@ -28,16 +28,19 @@ function LoginPage() {
   };
 
   return (
-    <div className="App">
+    <div className="App" id='login'>
       <header className="App-header">
-        <h2>Log In</h2>
+        <h2>Ready To Plan Dates?</h2>
+        <p className='subtitle'>Login in to begin</p>
         <form className="login-form" onSubmit={handleSubmit}>
+          <label id='form-label'>Email</label>
           <input type="email" name="email" placeholder="Email" value={credentials.email} onChange={handleChange} required />
+          <label id='form-label'>Password</label>
           <input type="password" name="password" placeholder="Password" value={credentials.password} onChange={handleChange} required />
           <button type="submit" className="login-btn">Log In</button>
         </form>
         {error && <p className="error">{error}</p>}
-        <p>Don’t have an account? <Link to="/signup">Sign Up</Link></p>
+        <p className='subtitle'>Don’t have an account? <Link to="/signup">Sign Up</Link></p>
       </header>
     </div>
   );

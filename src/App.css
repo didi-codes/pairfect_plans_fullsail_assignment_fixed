@@ -1,19 +1,229 @@
 .App {
-  text-align: center;
-  font-family: sans-serif;
+  font-family: "Maiden Orange", serif;
+  font-weight: 400;
+  font-style: normal;
+  color: #000;
+  background-color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 420px;   /* keep it centered like a mobile app */
+  margin: 0 auto;
+  border-left: 1px solid #eee;
+  border-right: 1px solid #eee;
 }
 
 .App-header {
   padding: 50px;
 }
 
-button {
-  padding: 10px 20px;
-  margin: 10px;
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  padding: 20px;
+}
+
+.logo {
+  width: 500x;
+  margin-bottom: 10px;
+}
+
+h1, h2 {
+  font-size: 40px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.subtitle {
   font-size: 16px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+button {
+  width: 100%;
+  max-width: 300px;
+  padding: 12px;
+  margin-top: 15px;
+  background-color: #ff66cc;
+  color: #000;
+  font-weight: bold;
+  font-size: 16px;
+  border: none;
+  border-radius: 12px;
   cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background-color: #ff4fbf;
 }
 
 button.secondary {
   background-color: #ccc;
+}
+
+a {
+  color: #ff66cc;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  background-color: #ffe6f7;
+  font-size: 14px;
+}
+
+#signup h2, p{
+  text-align: center;
+}
+
+#login h2, p{
+  text-align: center;
+}
+
+#welcome h1, p{
+  text-align: center;
+}
+
+#welcome-logo{
+  width: 100%;
+  height: auto;
+  margin-bottom: -150px;
+}
+
+#form-label {
+  font-size: 16px;
+  text-align: left !important;
+}
+
+/* ===== Header ===== */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.dashboard-header .left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#dashboard-logo {
+  width: 70px;
+  height: auto;
+}
+
+.username {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.profile-pic {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  object-fit: cover;
+}
+
+/* ===== Categories & Pills ===== */
+.category-section {
+  padding: 12px 16px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.pill-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  background-color: #fcdcff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: default;
+  transition: background 0.2s;
+}
+
+.pill.active {
+  background-color: #ffb6f9;
+  font-weight: bold;
+}
+
+/* ===== Recommendations ===== */
+.empty-text {
+  font-size: 14px;
+  color: #666;
+  padding: 0 16px 16px;
+}
+
+#recommended-dates{
+  margin-left: 12px;
+}
+
+#recommended-dates-title {
+  margin-left: 12px;
+}
+
+/* ===== Bottom Navigation ===== */
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid #ddd;
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+}
+
+.nav-icon {
+  font-size: 22px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.nav-icon.active {
+  background-color: #fcdcff;
+}
+
+.logout-btn {
+  background-color: #ff85d9;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: #ff60d0;
 }
