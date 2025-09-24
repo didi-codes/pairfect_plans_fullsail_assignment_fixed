@@ -3,7 +3,7 @@ import { auth, db } from './firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import logo from "./Pairfect_Plans_Logo.png";
-import profile_img from "./profile_image.jpg"
+import profile_img from "./profile_image.jpg";
 import './App.css';
 
 function Dashboard({ userPreferences: initialPreferences, recommendedDates: initialRecommendations }) {
@@ -13,7 +13,7 @@ function Dashboard({ userPreferences: initialPreferences, recommendedDates: init
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchPreferences = async () => {
+    const fetchPreferencesAndRecommendations = async () => {
       const user = auth.currentUser;
       if (!user) {
         navigate('/login');
@@ -26,14 +26,20 @@ function Dashboard({ userPreferences: initialPreferences, recommendedDates: init
           const prefs = prefDoc.data();
           setUserPreferences(prefs);
 
+          // Fetch ML recommendations only if none passed
           if (!recommendedDates.length) {
-            const recommendations = [];
-            if (prefs.outdoor) recommendations.push({ title: 'Picnic in the park', description: 'Enjoy a sunny day outside!' });
-            if (prefs.foodie) recommendations.push({ title: 'Cooking class', description: 'Try cooking something new together.' });
-            if (prefs.hobby === 'Arts') recommendations.push({ title: 'Visit an art gallery', description: 'Explore creativity together.' });
-            if (prefs.hobby === 'Movies') recommendations.push({ title: 'Movie night', description: 'Pick a film and relax together.' });
-            if (!recommendations.length) recommendations.push({ title: 'Coffee date', description: 'A simple, classic choice!' });
-            setRecommendedDates(recommendations);
+            const response = await fetch("http://localhost:5000/api/recommendations", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(prefs),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+              setRecommendedDates(data.recommendations.map(rec => ({ title: rec, description: "" })));
+            } else {
+              console.error("ML API Error:", data.error);
+            }
           }
         }
       } catch (err) {
@@ -43,7 +49,7 @@ function Dashboard({ userPreferences: initialPreferences, recommendedDates: init
       }
     };
 
-    fetchPreferences();
+    fetchPreferencesAndRecommendations();
   }, []);
 
   const handleLogout = async () => {
@@ -53,7 +59,6 @@ function Dashboard({ userPreferences: initialPreferences, recommendedDates: init
 
   if (loading) return <p>Loading your dashboard...</p>;
 
-  // categories for grouping preferences
   const preferenceCategories = {
     Outdoors: ["Hiking/Nature Trails", "Park/Picnics", "Camping/Glamping"],
     "Dining/Food": ["Coffee", "Boba", "Tacos"],
@@ -74,7 +79,7 @@ function Dashboard({ userPreferences: initialPreferences, recommendedDates: init
         <img src={profile_img} alt="profile" className="profile-pic" />
       </div>
 
-       {/* ===== Recommendations Section ===== */}
+      {/* ===== Recommendations Section ===== */}
       <h3 className="section-title" id='recommended-dates-title'>Recommended Dates</h3>
       {recommendedDates.length > 0 ? (
         <div className="pill-container" id='recommended-dates'>
@@ -88,7 +93,7 @@ function Dashboard({ userPreferences: initialPreferences, recommendedDates: init
         <p className="empty-text">No recommendations yet.</p>
       )}
 
-      {/* ===== Preferences Section (grouped by category) ===== */}
+      {/* ===== Preferences Section ===== */}
       {Object.entries(preferenceCategories).map(([category, items]) => (
         <div key={category} className="category-section">
           <h3 className="section-title">{category}</h3>

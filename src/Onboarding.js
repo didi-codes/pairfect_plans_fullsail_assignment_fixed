@@ -25,18 +25,36 @@ function Onboarding({ onComplete }) {
     if (user) {
       setSaving(true);
       try {
+        // Save preferences to Firestore
         await setDoc(doc(db, 'userPreferences', user.uid), updatedAnswers);
+
+        // After last step, call ML API to get recommendations
+        if (currentStep + 1 === questions.length) {
+          const response = await fetch("http://localhost:5000/api/recommendations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedAnswers),
+          });
+          const data = await response.json();
+          if (data.success) {
+            // Send recommendations back to parent/dashboard
+            onComplete && onComplete(updatedAnswers, data.recommendations);
+          } else {
+            console.error("ML API error:", data.error);
+            onComplete && onComplete(updatedAnswers, []);
+          }
+        }
       } catch (err) {
-        console.error('Error saving preferences:', err);
+        console.error('Error saving preferences or fetching recommendations:', err);
       } finally {
         setSaving(false);
       }
     }
 
+    // Go to next step or finish onboarding
     if (currentStep + 1 < questions.length) {
       setCurrentStep(currentStep + 1);
     } else {
-      onComplete && onComplete(updatedAnswers);
       navigate('/dashboard');
     }
   };

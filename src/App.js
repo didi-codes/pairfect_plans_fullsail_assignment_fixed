@@ -20,20 +20,26 @@ function App() {
       setUser(currentUser);
 
       if (currentUser) {
-        const prefDoc = await getDoc(doc(db, 'userPreferences', currentUser.uid));
-        if (prefDoc.exists()) {
-          const prefs = prefDoc.data();
-          setUserPreferences(prefs);
+        try {
+          const prefDoc = await getDoc(doc(db, 'userPreferences', currentUser.uid));
+          if (prefDoc.exists()) {
+            const prefs = prefDoc.data();
+            setUserPreferences(prefs);
 
-          // TEMP: generate recommendations
-          const recommendations = [];
-          if (prefs.outdoor) recommendations.push({ title: 'Picnic in the park', description: 'Enjoy a sunny day outside!' });
-          if (prefs.foodie) recommendations.push({ title: 'Cooking class', description: 'Try cooking something new together.' });
-          if (prefs.hobby === 'Arts') recommendations.push({ title: 'Visit an art gallery', description: 'Explore creativity together.' });
-          if (prefs.hobby === 'Movies') recommendations.push({ title: 'Movie night', description: 'Pick a film and relax together.' });
-          if (!recommendations.length) recommendations.push({ title: 'Coffee date', description: 'A simple, classic choice!' });
+            // Generate TEMP recommendations if ML recommendations not already present
+            if (!recommendedDates.length) {
+              const recommendations = [];
+              if (prefs.outdoor) recommendations.push({ title: 'Picnic in the park', description: 'Enjoy a sunny day outside!' });
+              if (prefs.foodie) recommendations.push({ title: 'Cooking class', description: 'Try cooking something new together.' });
+              if (prefs.hobby === 'Arts') recommendations.push({ title: 'Visit an art gallery', description: 'Explore creativity together.' });
+              if (prefs.hobby === 'Movies') recommendations.push({ title: 'Movie night', description: 'Pick a film and relax together.' });
+              if (!recommendations.length) recommendations.push({ title: 'Coffee date', description: 'A simple, classic choice!' });
 
-          setRecommendedDates(recommendations);
+              setRecommendedDates(recommendations);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching preferences:", err);
         }
       }
 
@@ -55,7 +61,16 @@ function App() {
           path="/onboarding"
           element={
             user ? (
-              userPreferences ? <Navigate to="/dashboard" /> : <Onboarding onComplete={(answers) => setUserPreferences(answers)} />
+              userPreferences ? (
+                <Navigate to="/dashboard" />
+              ) : (
+                <Onboarding
+                  onComplete={(answers, mlRecommendations = []) => {
+                    setUserPreferences(answers);
+                    setRecommendedDates(mlRecommendations); // set ML recommendations immediately
+                  }}
+                />
+              )
             ) : (
               <Navigate to="/login" />
             )
